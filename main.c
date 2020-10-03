@@ -3,13 +3,15 @@
 #include <memory.h>
 #include <string.h>
 
-int token;            // current token
-char *src, *old_src;  // pointer to source code string;
-int poolsize;         // default size of text/data/stack
-int line;             // line number
-int token_val;         // value of current token(
-int current_id=0;         //current parsed identifiers
+
+int token;              // current token
+int *src, *old_src;     // pointer to source code string;
+int poolsize;           // default size of text/data/stack
+int line;               // line number
+int token_val;          // value of current token(
+int current_id=0;       //current parsed identifiers
 int current_str=0;      //current parsed str
+
 
 //tokens and classes defined here
 enum{
@@ -28,7 +30,7 @@ struct identifier{
     Bclass,Btype,Bvalue; //BX for extern
 };
 
-char str[20][100];
+char string[100],*str = string;//string to buffer itself
 
 struct identifier array[130];//max identifier
 
@@ -38,64 +40,81 @@ void next(){
     int hash;
 
     while(token = *src++){
-//        if(token == '\n'){
-//            line++;
-//        }
-//
+        if(token == '\n') {
+            line++;
+        }
 
-        else if (token == '#'){
+
+        else if (token == '#')
+        {
             while(*src != 0 && *src!='\n' )
                 src++;
-        }//macro and more
-//
-//        else if((token >='a'&&token<='z') || (token>='A'&&token <= 'Z')||token == '_'){
-//            last_pos = src-1;
-//            hash = token;
-//
-//            while((token >='a'&&token<='z') || (token>='A'&&token <= 'Z')||
-//            token == '_'||(token>='0'&&token<='9'))
-//                hash = hash*147 + *src++;//hash this id
-//            idcpy(array[current_id].name,);
-//            array[current_id].hash = hash;
-//        }
-//
-//        else if (token>='0' && token <='9'){
-//            token_val = token - '0';
-//            while(*src>='0' && *src <='9')
-//                token_val = token_val*10 + *src++ -'0';
-//            token = Num;
-//            return;
-//        }
-//
-//        else if(token == '"'||token == '\'' ){
-//            last_pos = str[current_str];
-//            while(*src != 0 && *src != token ){
-//                token_val = *src++;
-//                if(token_val =='\\'){
-//                    token_val = *src++;
-//                    if(token =='n')
-//                        token_val = '\n';
-//                }//escape sequence(to be updated
-//                if(token =='"')
-//                    *str[current_str] = token_val;
-//            }
-//            src++;
-//            if(token == '"')
-//                token_val = (int)last_pos;
-//            else
-//                token = Num;
-//            return ;
-//        }
+        }//macro and more to be updated
+
+        else if((token >='a'&&token<='z') || (token>='A'&&token <= 'Z')||token == '_'){
+            last_pos = src-1;
+            hash = token;
+
+            while((*src >='a'&& *src <= 'z') || (*src>='A'&&*src <= 'Z')||
+             *src == '_'||(*src >='0'&& *src<='9'))
+            hash = hash*147 + *src++;//hash this id
+
+            current_id = 0;
+            while(array[current_id].token){
+                if(array[current_id].token == hash && strcmp(array[current_id].name,last_pos,src-last_pos))
+                {token = array[current_id].token;//found one
+                return ;}
+                current_id++;
+            }
+            array[current_id].name = last_pos;
+            array[current_id].hash = hash;
+            token = array[current_id] = Id;
+            return;
+        }
+
+        else if (token>='0' && token <='9'){
+            token_val = token - '0';
+            while(*src>='0' && *src <='9')
+                token_val = token_val*10 + *src++ -'0';
+            token = Num;
+            return;
+        }
+
+        else if(token == '"'||token == '\'' ){
+            while(*src != 0 && *src != token ) //
+            {
+                token_val = *src++;
+                if(token_val == '\\' ){
+                    token_val = *src++;
+                    if(token_val == 'n')
+                        token_val = '\n';
+                }//escape sequence(to be updated
+                if(token =='"')//copy string
+                    *str++ = token_val;
+            }//remember to restore str
+            src++;
+            if(token == '\'')//if its just a character
+                token = Num;
+            //else now "string" refers to the beginning of str
+            //and "str" refers to the end of str
+            return ;
+        }
 
         else if(token =='/'){
             if(*src=='/')
                 while(*src !=0 && *src !='\n')
                     src++;
+            else if(*src =='*') {
+                do{src++;}
+                while(*src!= 0 && (*(src) == '*' && *(src+1) != '/'));
+                src+=2;//jump over
+            }//overlook annotation
             else{
                 token = Div;
                 return;
             }
-        }//only '//' supported
+
+        }//only '//' supported ,to be updated
 
         else if (token == '=') {
             // parse '==' and '='
@@ -108,9 +127,9 @@ void next(){
             return;
         }
 
-        else if (token == '+') {
+        else if (token == '+'){
             // parse '+' and '++'
-            if (*src == '+') {
+            if (*src == '+'){
                 src ++;
                 token = Inc;
             }
@@ -154,7 +173,8 @@ void next(){
             return;
         }
 
-        else if (token == '>') {
+        else if (token == '>')
+        {
             // parse '>=', '>>' or '>'
             if (*src == '=') {
                 src ++;
@@ -207,14 +227,14 @@ void next(){
         }
 
         else if (token == '[') {
-            token = Brak;
+            token = Brk;
             return;
         }
 
         else if (token == '?') {
             token = Cond;
             return;
-        }
+        }//seems like we wont meet this
 
         else if (token == '~' || token == ';' || token == '{' || token == '}' || token == '(' || token == ')' || token == ']' || token == ',' || token == ':') {
             // directly return the character as token;
@@ -229,3 +249,5 @@ int main() {
     printf("Hello, World!\n");
     return 0;
 }
+
+
