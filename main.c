@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
+#include "astbuilder.h"
 
 
 int token;              // current token
@@ -15,7 +16,7 @@ int current_str=0;      //current parsed str
 
 //tokens and classes defined here
 enum{
-    Num = 128, Fun, Sys, Glo, Loc, Id,
+    Num = 128, Fun, Sys, Glo, Loc, Id,// Glo for global, Loc for local, sys for
     Char, Else, Enum, If, Int, Return, Sizeof, While,
     Assign, Cond, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,
     Add,Sub,Mul,Div, Mod, Inc, Dec,
@@ -30,6 +31,12 @@ struct identifier{
     Bclass,Btype,Bvalue; //BX for extern
 };
 
+struct token{
+    int type;
+    int value;//id for index,num and char for value
+
+};
+
 char string[100],*str = string;//string to buffer itself
 
 struct identifier array[130];//max identifier
@@ -40,10 +47,6 @@ void next(){
     int hash;
 
     while(token = *src++){
-        if(token == '\n') {
-            line++;
-        }
-
 
         else if (token == '#')
         {
@@ -175,22 +178,20 @@ void next(){
 
         else if (token == '>')
         {
-            // parse '>=', '>>' or '>'
             if (*src == '=') {
                 src ++;
-                token = Ge;
+                token = Ge;//>=
             }
             else if (*src == '>') {
                 src ++;
-                token = Shr;
+                token = Shr;//>>
             }
             else
-                token = Gt;
+                token = Gt;//>
             return;
         }
 
         else if (token == '|') {
-            // parse '|' or '||'
             if (*src == '|') {
                 src ++;
                 token = Lor;
@@ -231,11 +232,6 @@ void next(){
             return;
         }
 
-        else if (token == '?') {
-            token = Cond;
-            return;
-        }//seems like we wont meet this
-
         else if (token == '~' || token == ';' || token == '{' || token == '}' || token == '(' || token == ')' || token == ']' || token == ',' || token == ':') {
             // directly return the character as token;
             return;
@@ -243,6 +239,9 @@ void next(){
     }
     return;
 }
+
+
+
 
 
 int main() {
