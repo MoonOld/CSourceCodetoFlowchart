@@ -1,0 +1,10 @@
+//
+// Created by 网安 胡洋 on 2020/10/5.
+//
+
+#include <stdio.h>
+int add(){
+    int a, b=a=1;
+    printf("%d",a+b);
+    return 0;
+}

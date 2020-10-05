@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+/Users/apple/Desktop/programming/complier/astbuilder.h
+
 /Users/apple/Desktop/programming/complier/main.c
 stdio.h
 -
@@ -15,4 +17,6 @@ memory.h
 -
 string.h
 -
+astbuilder.h
+/Users/apple/Desktop/programming/complier/astbuilder.h
 

@@ -5,13 +5,6 @@
 #include "astbuilder.h"
 
 
-int token;              // current token
-int *src, *old_src;     // pointer to source code string;
-int poolsize;           // default size of text/data/stack
-int line;               // line number
-int token_val;          // value of current token(
-int current_id=0;       //current parsed identifiers
-int current_str=0;      //current parsed str
 
 
 //tokens and classes defined here
@@ -20,90 +13,112 @@ enum{
     Char, Else, Enum, If, Int, Return, Sizeof, While,
     Assign, Cond, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,
     Add,Sub,Mul,Div, Mod, Inc, Dec,
-    Brk
+    Brk,Str
 };
 
-struct identifier{
+typedef struct  ident id;
+struct ident{
     int token;
     int hash;
     char  name[11];
-    int class,type,value,
-    Bclass,Btype,Bvalue; //BX for extern
 };
 
+typedef struct token Token;
 struct token{
     int type;
     int value;//id for index,num and char for value
-
 };
 
-char string[100],*str = string;//string to buffer itself
+char string[20][100];//string to buffer itself
+id array[130];//max identifier
+Token * tokens[20000];
+char * _file[60000];
 
-struct identifier array[130];//max identifier
+void load(FILE * _fileI,char* file){
+    while( ( *file++ = fgetc(_fileI) ) != EOF);
+}
+int stringcmp(char* a,char*b,int length){
+    while(*a++ == *b++ && (length--));
+    if(length)
+        return 0;
+    else return 1;
+}
 
-
-void next(){
+int lex(char * src ,Token * tp, id * ip,char str[100]){
     char *last_pos;
-    int hash;
+    int Hash,current_id,idnum,current_cpyid,current_cpystr;
+    unsigned char buffer,strbuffer;
 
-    while(token = *src++){
-
-        else if (token == '#')
+    while((buffer = *src++)){
+        if ( buffer == '#')
         {
             while(*src != 0 && *src!='\n' )
                 src++;
         }//macro and more to be updated
 
-        else if((token >='a'&&token<='z') || (token>='A'&&token <= 'Z')||token == '_'){
+        else if((buffer >='a'&&buffer<='z') || (buffer>='A'&& buffer <= 'Z')
+        ||buffer == '_'){
             last_pos = src-1;
-            hash = token;
+            Hash = buffer;
 
             while((*src >='a'&& *src <= 'z') || (*src>='A'&&*src <= 'Z')||
              *src == '_'||(*src >='0'&& *src<='9'))
-            hash = hash*147 + *src++;//hash this id
-
+            Hash = Hash*147 + *src++;//hash this id
             current_id = 0;
-            while(array[current_id].token){
-                if(array[current_id].token == hash && strcmp(array[current_id].name,last_pos,src-last_pos))
-                {token = array[current_id].token;//found one
-                return ;}
+            while((ip+current_id)->token){
+                if((ip+current_id)->hash == Hash && stringcmp(array[current_id].name,last_pos,src-last_pos))
+                {tp->type=Id;
+                tp->value = current_id;
+                break;}
                 current_id++;
             }
-            array[current_id].name = last_pos;
-            array[current_id].hash = hash;
-            token = array[current_id] = Id;
-            return;
-        }
-
-        else if (token>='0' && token <='9'){
-            token_val = token - '0';
-            while(*src>='0' && *src <='9')
-                token_val = token_val*10 + *src++ -'0';
-            token = Num;
-            return;
-        }
-
-        else if(token == '"'||token == '\'' ){
-            while(*src != 0 && *src != token ) //
+            if((ip+current_id)->token == 0)
             {
-                token_val = *src++;
-                if(token_val == '\\' ){
-                    token_val = *src++;
-                    if(token_val == 'n')
-                        token_val = '\n';
-                }//escape sequence(to be updated
-                if(token =='"')//copy string
-                    *str++ = token_val;
-            }//remember to restore str
-            src++;
-            if(token == '\'')//if its just a character
-                token = Num;
-            //else now "string" refers to the beginning of str
-            //and "str" refers to the end of str
-            return ;
+                current_cpyid = 0;
+                while (last_pos < src)
+                    (ip + current_id)->name[current_cpyid++] = *last_pos++;
+                (ip+current_id)->name[current_cpyid] = '\0';
+                (ip+current_id)->hash = Hash;
+                tp->type = Id;
+                tp++->value = current_id;
+            }
         }
 
-        else if(token =='/'){
+        else if (buffer>='0' && buffer <='9'){
+            buffer = buffer - '0';
+            while(*src>='0' && *src <='9')
+                buffer = buffer*10 + *src++ -'0';
+            tp->value = buffer;
+            tp++->type = Num;
+        }
+
+        else if(buffer == '"'||buffer == '\'' ){
+            current_cpystr = 0;
+            while(*src != 0 && *src != buffer ) //
+            {
+                strbuffer = *src++;
+                if(strbuffer == '\\' ){
+                    strbuffer = *src++;
+                    if(strbuffer == 'n')
+                        strbuffer = '\n';
+                }//escape sequence(to be updated
+                if(buffer =='"')//copy string
+                    str[current_cpystr++] = strbuffer;
+            }
+            src++;
+            if(buffer == '\'')//if its just a character
+            {
+                tp -> type = Num;
+                tp++ -> value = strbuffer;
+            }
+            else
+                {
+                str[current_cpystr] = '\0';
+                str++;
+            }
+        }
+
+        else if(buffer =='/'){
             if(*src=='/')
                 while(*src !=0 && *src !='\n')
                     src++;
@@ -111,141 +126,151 @@ void next(){
                 do{src++;}
                 while(*src!= 0 && (*(src) == '*' && *(src+1) != '/'));
                 src+=2;//jump over
-            }//overlook annotation
-            else{
-                token = Div;
-                return;
             }
+            else
+                tp++ ->type = Div;
+        }//annototaion
 
-        }//only '//' supported ,to be updated
-
-        else if (token == '=') {
+        else if (buffer == '=') {
             // parse '==' and '='
             if (*src == '=') {
                 src ++;
-                token = Eq;
+                tp++ ->type = Eq;
             }
             else
-                token = Assign;
-            return;
+                tp++ -> type =  Assign;
         }
 
-        else if (token == '+'){
+        else if (buffer == '+'){
             // parse '+' and '++'
             if (*src == '+'){
                 src ++;
-                token = Inc;
+                tp++->type =  Inc;
             }
             else
-                token = Add;
-            return;
+                tp++->type = Add;
         }
 
-        else if (token == '-') {
+        else if (buffer == '-') {
             // parse '-' and '--'
             if (*src == '-') {
                 src ++;
-                token = Dec;
+                tp++->type= Dec;
             }
             else
-                token = Sub;
-            return;
+                tp++->type= Sub;
         }
 
-        else if (token == '!') {
+        else if (buffer == '!') {
             // parse '!='
             if (*src == '=') {
                 src++;
-                token = Ne;
+                tp++->type = Ne;
             }
-            return;
         }
 
-        else if (token == '<') {
+        else if (buffer == '<') {
             // parse '<=', '<<' or '<'
             if (*src == '=') {
                 src ++;
-                token = Le;
+                tp++->type = Le;
             }
             else if (*src == '<') {
                 src ++;
-                token = Shl;
+                tp++->type = Shl;
             }
             else
-                token = Lt;
-            return;
+                tp++->type = Lt;
         }
 
-        else if (token == '>')
+        else if (buffer == '>')
         {
             if (*src == '=') {
                 src ++;
-                token = Ge;//>=
+                tp++->type = Ge;//>=
             }
             else if (*src == '>') {
                 src ++;
-                token = Shr;//>>
+                tp++->type = Shr;//>>
             }
             else
-                token = Gt;//>
-            return;
+                tp++->type = Gt;//>
         }
 
-        else if (token == '|') {
+        else if (buffer == '|') {
             if (*src == '|') {
                 src ++;
-                token = Lor;
+                tp++->type = Lor;
             }
             else
-                token = Or;
-            return;
+                tp++->type = Or;
         }
 
-        else if (token == '&') {
+        else if (buffer == '&') {
             // parse '&' and '&&'
             if (*src == '&') {
                 src ++;
-                token = Lan;
+                tp++->type = Lan;
             }
             else
-                token = And;
-            return;
+                tp++->type = And;
         }
 
-        else if (token == '^') {
-            token = Xor;
-            return;
+        else if (buffer == '^') {
+            tp++->type = Xor;
         }
 
-        else if (token == '%') {
-            token = Mod;
-            return;
+        else if (buffer == '%') {
+            tp++->type = Mod;
         }
 
-        else if (token == '*') {
-            token = Mul;
-            return;
+        else if (buffer == '*') {
+            tp++->type = Mul;
         }
 
-        else if (token == '[') {
-            token = Brk;
-            return;
+        else if (buffer == '[') {
+            tp++->type = Brk;
         }
 
-        else if (token == '~' || token == ';' || token == '{' || token == '}' || token == '(' || token == ')' || token == ']' || token == ',' || token == ':') {
+        else if (buffer == '~' || buffer == ';' || buffer == '{' || buffer == '}' || buffer == '('
+        || buffer == ')' || buffer == ']' || buffer == ',' || buffer == ':') {
             // directly return the character as token;
-            return;
+            tp++->type = buffer;
         }
     }
-    return;
+    return 0;
+}
+
+
+int lextest(Token * tp, id* ip,char str[20][100])
+{
+    while(tp->type)
+    {
+        if(tp->type == Num)
+            printf("<Num, %d>", tp->type, tp->value);
+        else if (tp->type == Id)
+            printf("<Id,%s>");
+        else if (tp->type == Str)
+            printf("<Str,%s>",str[tp->value]);
+        else
+            printf("<%d>",tp->type);
+        tp++;
+    }
+    return 0;
 }
 
 
 
 
-
 int main() {
-    printf("Hello, World!\n");
+    FILE * _fileI = NULL;
+
+    if(_fileI = fopen("test.txt","r")) {
+        load(_fileI, _file);
+        fclose(_fileI);
+        lex(_file, tokens, array, string);
+        lextest(tokens, array, string);
+    }
     return 0;
 }
 
