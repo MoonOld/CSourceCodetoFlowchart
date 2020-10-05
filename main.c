@@ -31,8 +31,8 @@ struct token{
 
 char string[20][100];//string to buffer itself
 id array[130];//max identifier
-Token * tokens[20000];
-char * _file[60000];
+Token tokens[20000];
+char src[60000];
 
 void load(FILE * _fileI,char* file){
     while( ( *file++ = fgetc(_fileI) ) != EOF);
@@ -68,7 +68,7 @@ int lex(char * src ,Token * tp, id * ip,char str[100]){
             while((ip+current_id)->token){
                 if((ip+current_id)->hash == Hash && stringcmp(array[current_id].name,last_pos,src-last_pos))
                 {tp->type=Id;
-                tp->value = current_id;
+                tp++->value = current_id;
                 break;}
                 current_id++;
             }
@@ -79,6 +79,7 @@ int lex(char * src ,Token * tp, id * ip,char str[100]){
                     (ip + current_id)->name[current_cpyid++] = *last_pos++;
                 (ip+current_id)->name[current_cpyid] = '\0';
                 (ip+current_id)->hash = Hash;
+                (ip+current_id)->token = 1;
                 tp->type = Id;
                 tp++->value = current_id;
             }
@@ -249,7 +250,7 @@ int lextest(Token * tp, id* ip,char str[20][100])
         if(tp->type == Num)
             printf("<Num, %d>", tp->type, tp->value);
         else if (tp->type == Id)
-            printf("<Id,%s>");
+            printf("<Id,%s>",ip[tp->value].name);
         else if (tp->type == Str)
             printf("<Str,%s>",str[tp->value]);
         else
@@ -265,10 +266,10 @@ int lextest(Token * tp, id* ip,char str[20][100])
 int main() {
     FILE * _fileI = NULL;
 
-    if(_fileI = fopen("test.txt","r")) {
-        load(_fileI, _file);
+    if(_fileI = fopen("/Users/apple/desktop/programming/complier/test.txt","r")) {
+        load(_fileI, src);
         fclose(_fileI);
-        lex(_file, tokens, array, string);
+        lex(src, tokens, array, string);
         lextest(tokens, array, string);
     }
     return 0;
