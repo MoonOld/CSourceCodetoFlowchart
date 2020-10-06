@@ -5,30 +5,6 @@
 #include "astbuilder.h"
 
 
-
-
-//tokens and classes defined here
-enum{
-    Num = 128, Fun, Sys, Glo, Loc, Id,// Glo for global, Loc for local, sys for
-    Char, Else, Enum, If, Int, Return, Sizeof, While,
-    Assign, Cond, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,
-    Add,Sub,Mul,Div, Mod, Inc, Dec,
-    Brk,Str
-};
-
-typedef struct  ident id;
-struct ident{
-    int token;
-    int hash;
-    char  name[11];
-};
-
-typedef struct token Token;
-struct token{
-    int type;
-    int value;//id for index,num and char for value
-};
-
 char string[20][100];//string to buffer itself
 id array[130];//max identifier
 Token tokens[20000];
