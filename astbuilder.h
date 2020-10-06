@@ -11,7 +11,7 @@
 //tokens and classes defined here
 enum{
     Num = 128, Fun, Sys, Glo, Loc, Id,// Glo for global, Loc for local, sys for
-    Char, Else, Enum, If, Int, Return, Sizeof, While,
+    Else, If, Char,Int,Float, Return, While,
     Assign, Cond, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,
     Add,Sub,Mul,Div, Mod, Inc, Dec,
     Brk,Str
@@ -48,6 +48,7 @@ struct ast{
     AST* firstson;
     AST* fellow;
 };
+
 /*  EBNFlist
 program ::= {global_declaration}+
 global_declaration ::= enum_decl | variable_decl | function_decl
@@ -67,9 +68,16 @@ AST nodetype defined here */
 enum {
     function_defined,decl,
     parameter_decl,body_decl,variable_decl,stmt,
-    stnoempty,stempty,ifst,whilest,forst,retexp,exp,stop
+    stnoempty,stempty,ifst,whilest,forst,retexp,exp,stop,
+    arry
 };
 
 #endif //COMPLIER_ASTBULIDER_H
-
+/*先把主体的部分输出
+ * 变量声明、表达式直接输出到分号
+ * 函数、宏定义直接输出
+ * 从int main开始（圆角矩形）顺序执行（矩形）
+ * 遇到if、while、for（菱形）、else（if接的no）先输出复合语句块，continue回到循环、break执行语句块下一块、while、for的no接语句块下一块
+ * 没有else 则no接到语句块下一个语句
+ * */
 
