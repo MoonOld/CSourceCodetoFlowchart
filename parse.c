@@ -49,56 +49,158 @@ AST* parse(Token * tp,id* ip, char str[20][100]){
     AST* p = makempty();
     p->type = Program;
     while(tp->type){
-        int();
+        tp = glo_decl(p,tp);
         tp++;
     }
-    return 0 ;
+    return p ;
 }
 
 /*
 global_declaration ::=  variable_decl | function_decl
  */
-int glo_decl(Token* tp, id* ip, char str[20][100]){
+Token * glo_decl(AST* p,Token* tp){
+    p = insert(p,global_decl,0,1);
     if(is_type(tp->type)){
-        if((tp+2)->type == '(')
-            func_decl();
-        else vari_decl();
+        if((tp+1)->type == '(')
+        {
+            p = insert(p,function_defined,0,1);
+            tp = func_decl(p,tp);
+        }
+        else {
+            p  = insert(p,variable_decl,0,1);
+            tp = vari_decl(p,tp);
+        }
     }
     else {
         printf("error! 'type' needed!");
         return 1;
     }
+    return tp;
 }
 /*variable_decl ::= type  id { ',' id } ';'                             no initialize no decorate
 function_decl ::= type id '(' parameter_decl ')' '{' body_decl '}'      to be added
 parameter_decl ::= type id {',' type id}
-body_decl ::= {variable_decl}, {statement}
-statement ::= non_empty_statement | empty_statement
+body_decl ::= {variable_decl}, statement
+statement ::= [non_empty_statement] | empty_statement
 non_empty_statement ::= if_statement | while_statement | '{' statement '}'
                      | 'return' expression | expression ';'
 if_statement ::= 'if' '(' expression ')' statement ['else' non_empty_statement]
 while_statement ::= 'while' '(' expression ')' non_empty_statement
  */
-int func_decl(AST * p, Token * tp,char str[20][100]){
+Token * func_decl(AST * p, Token * tp,char str[20][100]){
     p = insert(p,tp->type,tp->value,1);//insert type
     tp++;
     p = insert(p,tp->type,tp->value,0);//insert id
     tp++;
     if(tp->type == '('){
         p = insert(p,parameter_decl,0,0);//insert parameter-list
-        tp = para_decl(p,tp);
-        if(tp->type == '{')p = insert(p,body_decl, 0, 0);
-    bd_decl();}
-    return 0;
+        tp = para_decl(p,tp); //ignore )
+        if(tp->type == '{'){
+            p = insert(p,body_decl,0,0);
+            tp = bd_st(p,tp);
+        }
+        else printf("function body part needs '{}'");
+    }
+    return  tp;
 }
 
 Token * para_decl(AST* p,Token* tp){
-    do{
         p = insert(p,tp->type,tp->value,1);//type
         tp++;
         p = insert(p,tp->type,tp->value,0);//id
         tp++;
-    }while(tp++ -> type == ',');
+        while(tp->type != ','){
+            p = insert(p,tp->type,tp->value,0);//type
+            tp++;
+            p = insert(p,tp->type,tp->value,0);//id
+            tp++;
+        }
+    return ++tp;
+}
+
+Token * bd_st(AST* p,Token* tp ){
+    if (is_type(tp->type)){
+        p = insert(p,variable_decl,0,1);
+        tp = vari_decl(p,tp);
+        while(is_type(tp->type)){
+            p = insert(p,variable_decl,0,0);
+            tp = vari_decl(p,tp);
+        }
+    }
+    if(tp->type == '{'){
+        p = insert(p,stmt_st,0,0);
+        tp = stmt(p,tp);
+    }
+    else printf("statement needs '{}'");
     return tp;
 }
 
+Token * stmt(AST*p ,Token* tp){//block statement
+    char flag = 1;
+    while( (++tp)->type != '}'){
+        if (tp->type == If){
+            p = insert(p,ifst,0,flag);
+            tp = if_st(p,tp);
+            if(flag)flag--;
+        }
+
+        else if (tp->type == While) {
+            p = insert(p,whilest,0,flag);
+            tp = while_st(p,tp);
+            if(flag)flag--;
+        }
+
+        else if (tp->type == For) {
+            p = insert(p,forst,0,flag);
+            tp = for_st(p,tp);
+            if(flag)flag--;
+        }
+
+        else if (tp->type == Return) {
+            p = insert(p,retexp,0,flag);
+            tp = ret_exp(p,tp);
+            if(flag)flag--;
+        }
+
+        else//exp
+        {
+            p = insert(p,exp,0,flag);
+            tp = exp_st(p,tp);
+            if(flag)flag--;
+        }
+    }
+    return ++tp;//ignore }
+}
+
+
+/*
+ * if_st -> '(' exp_st ')' [ '{' stmt '}' | exp_st ]
+ */
+Token * if_st(AST* p,Token * tp){
+    tp+=2;
+    p = insert(p,condition,0,1);
+    tp = exp_st(p,tp);//condition
+    if( (++tp)->type =='{')tp= stmt(p,tp);
+    else tp = exp_st(p,tp);
+    if(tp->type == Else){
+        if((++tp)->type=='{') tp = stmt(p,tp);
+        else tp = exp_st(p,tp);
+    }
+    return tp;
+}
+
+//exp_st -> id [op id]   |  '~' id
+Token* exp_st(AST*p,Token*tp){
+    p = insert(p,exp,0,0);
+    while(tp->type != Id && nop(tp->type)){
+        p =insert(p,tp->type,tp->value,0);
+        tp++;
+    }
+    return tp;
+}
+
+int nop(int a){
+    if(a>= Assign && a<= Mod  ||  a=='['||a==']'||a=='~'
+    ||a=='('||a==')')return 1;
+    else return 0;
+}

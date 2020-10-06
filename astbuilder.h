@@ -11,10 +11,10 @@
 //tokens and classes defined here
 enum{
     Num = 128, Fun, Sys, Glo, Loc, Id,// Glo for global, Loc for local, sys for
-    Else, If, Char,Int,Float, Return, While,
-    Assign, Cond, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,
-    Add,Sub,Mul,Div, Mod, Inc, Dec,
-    Brk,Str
+    Else, If, Char,Int,Float, Return, While,For,
+    Assign, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,//Lt <  Le <=
+    Add,Sub,Mul,Div, Mod,
+    ary,Str,Brk
 };
 
 typedef struct  ident id;
@@ -66,9 +66,11 @@ for_statement ::= 'for' '(' {expression} ';' {expression} ';' ')' non_empty_stat
 AST nodetype defined here */
 enum {
     Program,
+    global_decl,
     function_defined,decl,
-    parameter_decl,body_decl,variable_decl,stmt,
+    parameter_decl,body_decl,variable_decl,stmt_st,
     stnoempty,stempty,ifst,whilest,forst,retexp,exp,stop,
+    condition
     arry
 };
 
