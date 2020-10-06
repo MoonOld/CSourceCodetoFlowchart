@@ -20,9 +20,9 @@ int stringcmp(char* a,char*b,int length){
     else return 1;
 }
 
-int lex(char * src ,Token * tp, id * ip,char str[100]){
-    char *last_pos;
-    int Hash,current_id,idnum,current_cpyid,current_cpystr;
+int lex(char * src ,Token * tp, id * ip,char stro[20][100]){
+    char *last_pos,*str=stro[0];
+    int Hash,current_id,idnum,current_cpyid,current_cpystr,current_str=0;
     unsigned char buffer,strbuffer;
 
     while((buffer = *src++)){
@@ -90,8 +90,9 @@ int lex(char * src ,Token * tp, id * ip,char str[100]){
             }
             else
                 {
-                str[current_cpystr] = '\0';
-                str++;
+                tp ->type =Str;
+                tp++ -> value = current_str ;
+                (str+current_str++)[current_cpystr] = '\0';
             }
         }
 

@@ -27,24 +27,23 @@ struct ident{
 typedef struct token Token;
 struct token{
     int type;
-    int value;//id for index,num and char for value
+    int value;//id,string for index,num and char for value
+};
+
+typedef struct TOKENSTR stream;
+struct TOKENSTR{
+    Token * tp;
+    id * ip;
+    char * str[20][100];
 };
 
 
-int astbuilder();
-int insert();
-int output();
-int makempty();
-void load(FILE * _fileI,char* file);
-int stringcmp(char* a,char*b,int length);
-int lex(char * src ,Token * tp, id * ip,char str[100]);
-int lextest(Token * tp, id* ip,char str[20][100]);
+
 
 typedef struct ast AST;
 struct ast{
-    int type;
+    int type; //token
     int value;
-    int string_end;
     AST* firstson;
     AST* fellow;
 };
@@ -66,12 +65,22 @@ for_statement ::= 'for' '(' {expression} ';' {expression} ';' ')' non_empty_stat
 
 AST nodetype defined here */
 enum {
+    Program,
     function_defined,decl,
     parameter_decl,body_decl,variable_decl,stmt,
     stnoempty,stempty,ifst,whilest,forst,retexp,exp,stop,
     arry
 };
 
+AST* insert(AST* node,int type,int value,int mode);
+int output();
+AST* makempty();
+int is_type(int tocheck);
+
+void load(FILE * _fileI,char* file);
+int stringcmp(char* a,char*b,int length);
+int lex(char * src ,Token * tp, id * ip,char str[100]);
+int lextest(Token * tp, id* ip,char str[20][100]);
 #endif //COMPLIER_ASTBULIDER_H
 /*先把主体的部分输出
  * 变量声明、表达式直接输出到分号

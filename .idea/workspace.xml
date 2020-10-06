@@ -14,7 +14,9 @@
     <list default="true" id="b7cc3672-5ab9-4068-a573-080dd52b7e58" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/astbuilder.h" beforeDir="false" afterPath="$PROJECT_DIR$/astbuilder.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/parse.c" beforeDir="false" afterPath="$PROJECT_DIR$/parse.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +87,7 @@
       <updated>1601624341446</updated>
       <workItem from="1601624343179" duration="13583000" />
       <workItem from="1601704077405" duration="638000" />
-      <workItem from="1601705184593" duration="30431000" />
+      <workItem from="1601705184593" duration="38831000" />
     </task>
     <servers />
   </component>
@@ -141,13 +143,17 @@
       <screen x="0" y="23" width="1440" height="809" />
     </state>
     <state width="1398" height="180" key="GridCell.Tab.1.right/0.23.1440.809@0.23.1440.809" timestamp="1601884966948" />
+    <state x="385" y="156" width="670" height="676" key="search.everywhere.popup" timestamp="1601974999982">
+      <screen x="0" y="23" width="1440" height="809" />
+    </state>
+    <state x="385" y="156" width="670" height="676" key="search.everywhere.popup/1440.-14.1920.1057/0.23.1440.809@0.23.1440.809" timestamp="1601974999982" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/main.c</url>
-          <line>248</line>
+          <line>249</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
