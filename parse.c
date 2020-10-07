@@ -180,22 +180,40 @@ Token * if_st(AST* p,Token * tp){
     tp+=2;
     p = insert(p,condition,0,1);
     tp = exp_st(p,tp);//condition
-    if( (++tp)->type =='{')tp= stmt(p,tp);
-    else tp = exp_st(p,tp);
+    if( (++tp)->type =='{'){
+        p = insert(p,stmt_st, 0,0);
+        tp= stmt(p,tp);
+    }
+    else {
+        p = insert(p,exp,0,0);
+        tp = exp_st(p,tp);
+    }
     if(tp->type == Else){
-        if((++tp)->type=='{') tp = stmt(p,tp);
-        else tp = exp_st(p,tp);
+        if((++tp)->type=='{'){
+            p = insert(p,stmt_st,0,0);
+            tp = stmt(p,tp);
+        }
+        else {
+            p = insert(p,exp,0,0);
+            tp = exp_st(p,tp);
+        }
     }
     return tp;
 }
 
 //exp_st -> id [op id]   |  '~' id
-Token* exp_st(AST*p,Token*tp){
-    p = insert(p,exp,0,0);
+Token* exp_st(AST*p,Token*tp)
+{
+    p = insert(p,tp->type,tp->value,1);
+    tp++;
     while(tp->type != Id && nop(tp->type)){
         p =insert(p,tp->type,tp->value,0);
         tp++;
     }
+
+    //continue
+    //emtpy_exp
+    //break
     return tp;
 }
 
@@ -203,4 +221,47 @@ int nop(int a){
     if(a>= Assign && a<= Mod  ||  a=='['||a==']'||a=='~'
     ||a=='('||a==')')return 1;
     else return 0;
+}
+
+Token * while_st(AST *p, Token* tp){
+    tp+= 2;
+    p = insert(p,condition,0,1);
+    tp = exp_st(p,tp);
+    if( (++tp)->type =='{'){
+        p = insert(p,stmt_st, 0,0);
+        tp= stmt(p,tp);
+    }
+    else {
+        p = insert(p,exp,0,0);
+        tp = exp_st(p,tp);
+    }
+    return tp;
+}
+
+
+Token * for_st(AST*p, Token * tp){
+    tp+=2;
+    p = insert(p,forfdo,0,1);
+    tp = exp_st(p,tp);//please ignore ;
+    p = insert(p,condition,0,0);
+    tp = exp_st(p,tp);
+    p = insert(p,fordo,0,0);
+    tp = exp_st(p,tp);
+    if(tp->type == '{'){
+        p = insert(p,stmt_st,0,0);
+        tp = stmt(p,tp);
+    }
+    else{
+        p = insert(p,exp,0,0);
+        tp = exp_st(p,tp);
+    }
+    return tp;
+}
+
+
+Token* ret_exp(AST *p, Token* tp){
+
+
+
+    return tp;
 }

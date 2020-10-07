@@ -69,8 +69,8 @@ enum {
     global_decl,
     function_defined,decl,
     parameter_decl,body_decl,variable_decl,stmt_st,
-    stnoempty,stempty,ifst,whilest,forst,retexp,exp,stop,
-    condition
+    stnoempty,stempty,ifst,whilest,forst,forfdo,fordo,retexp,exp,stop,
+    condition,
     arry
 };
 
