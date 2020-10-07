@@ -83,6 +83,24 @@ void load(FILE * _fileI,char* file);
 int stringcmp(char* a,char*b,int length);
 int lex(char * src ,Token * tp, id * ip,char str[100]);
 int lextest(Token * tp, id* ip,char str[20][100]);
+
+
+Token* exp_st(AST*p,Token*tp);
+Token* ret_exp(AST *p, Token* tp);
+Token * for_st(AST*p, Token * tp);
+Token * while_st(AST *p, Token* tp);
+Token * if_st(AST* p,Token * tp);
+Token * stmt(AST*p ,Token* tp);
+Token * bd_st(AST* p,Token* tp );
+Token * para_decl(AST* p,Token* tp);
+Token * func_decl(AST * p, Token * tp);
+Token * glo_decl(AST* p,Token* tp);
+AST* parse(Token * tp);
+
+
+
+
+
 #endif //COMPLIER_ASTBULIDER_H
 /*先把主体的部分输出
  * 变量声明、表达式直接输出到分号

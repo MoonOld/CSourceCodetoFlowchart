@@ -42,10 +42,21 @@ int is_type(int tocheck){
     if(tocheck >=Char && tocheck<= Float)return 1;
     else return 0;
 }
-/*   EBNF in c
-program ::= {global_declaration}+
-*/
-AST* parse(Token * tp,id* ip, char str[20][100]){
+
+int is_varidecl(int a ){
+    if(a == Id|| a==',')return 1;
+    return 0;
+}
+
+int in_field(int a){
+    if(a>= Assign && a<= Mod  ||  a=='['  || a==']'
+       ||  a=='~'|| a==',' ||  a=='('  || a==')' )return 1;
+    else return 0;
+}
+
+
+AST* parse(Token * tp)
+{
     AST* p = makempty();
     p->type = Program;
     while(tp->type){
@@ -55,10 +66,9 @@ AST* parse(Token * tp,id* ip, char str[20][100]){
     return p ;
 }
 
-/*
-global_declaration ::=  variable_decl | function_decl
- */
-Token * glo_decl(AST* p,Token* tp){
+
+Token * glo_decl(AST* p,Token* tp)
+{
     p = insert(p,global_decl,0,1);
     if(is_type(tp->type)){
         if((tp+1)->type == '(')
@@ -79,15 +89,9 @@ Token * glo_decl(AST* p,Token* tp){
 }
 /*variable_decl ::= type  id { ',' id } ';'                             no initialize no decorate
 function_decl ::= type id '(' parameter_decl ')' '{' body_decl '}'      to be added
-parameter_decl ::= type id {',' type id}
-body_decl ::= {variable_decl}, statement
-statement ::= [non_empty_statement] | empty_statement
-non_empty_statement ::= if_statement | while_statement | '{' statement '}'
-                     | 'return' expression | expression ';'
-if_statement ::= 'if' '(' expression ')' statement ['else' non_empty_statement]
-while_statement ::= 'while' '(' expression ')' non_empty_statement
  */
-Token * func_decl(AST * p, Token * tp,char str[20][100]){
+Token * func_decl(AST * p, Token * tp)
+{
     p = insert(p,tp->type,tp->value,1);//insert type
     tp++;
     p = insert(p,tp->type,tp->value,0);//insert id
@@ -104,7 +108,8 @@ Token * func_decl(AST * p, Token * tp,char str[20][100]){
     return  tp;
 }
 
-Token * para_decl(AST* p,Token* tp){
+Token * para_decl(AST* p,Token* tp)
+{
         p = insert(p,tp->type,tp->value,1);//type
         tp++;
         p = insert(p,tp->type,tp->value,0);//id
@@ -118,7 +123,8 @@ Token * para_decl(AST* p,Token* tp){
     return ++tp;
 }
 
-Token * bd_st(AST* p,Token* tp ){
+Token * bd_st(AST* p,Token* tp )
+{
     if (is_type(tp->type)){
         p = insert(p,variable_decl,0,1);
         tp = vari_decl(p,tp);
@@ -135,7 +141,12 @@ Token * bd_st(AST* p,Token* tp ){
     return tp;
 }
 
-Token * stmt(AST*p ,Token* tp){//block statement
+Token * stmt(AST*p ,Token* tp)
+{//block statement
+
+    //continue
+    //emtpy_exp
+    //break
     char flag = 1;
     while( (++tp)->type != '}'){
         if (tp->type == If){
@@ -176,7 +187,8 @@ Token * stmt(AST*p ,Token* tp){//block statement
 /*
  * if_st -> '(' exp_st ')' [ '{' stmt '}' | exp_st ]
  */
-Token * if_st(AST* p,Token * tp){
+Token * if_st(AST* p,Token * tp)
+{
     tp+=2;
     p = insert(p,condition,0,1);
     tp = exp_st(p,tp);//condition
@@ -201,29 +213,9 @@ Token * if_st(AST* p,Token * tp){
     return tp;
 }
 
-//exp_st -> id [op id]   |  '~' id
-Token* exp_st(AST*p,Token*tp)
+
+Token * while_st(AST *p, Token* tp)
 {
-    p = insert(p,tp->type,tp->value,1);
-    tp++;
-    while(tp->type != Id && nop(tp->type)){
-        p =insert(p,tp->type,tp->value,0);
-        tp++;
-    }
-
-    //continue
-    //emtpy_exp
-    //break
-    return tp;
-}
-
-int nop(int a){
-    if(a>= Assign && a<= Mod  ||  a=='['||a==']'||a=='~'
-    ||a=='('||a==')')return 1;
-    else return 0;
-}
-
-Token * while_st(AST *p, Token* tp){
     tp+= 2;
     p = insert(p,condition,0,1);
     tp = exp_st(p,tp);
@@ -239,7 +231,8 @@ Token * while_st(AST *p, Token* tp){
 }
 
 
-Token * for_st(AST*p, Token * tp){
+Token * for_st(AST*p, Token * tp)
+{
     tp+=2;
     p = insert(p,forfdo,0,1);
     tp = exp_st(p,tp);//please ignore ;
@@ -259,9 +252,36 @@ Token * for_st(AST*p, Token * tp){
 }
 
 
-Token* ret_exp(AST *p, Token* tp){
+Token* ret_exp(AST *p, Token* tp)
+{
+    p = insert(p,exp,0,1);
+    tp = exp_st(p,tp);  //ignore ;
+    return tp;
+}
 
 
+
+Token* exp_st(AST*p,Token*tp)
+{
+    p = insert(p,tp->type,tp->value,1);
+    tp++;
+    while(tp->type != Id && in_field(tp->type)){
+        p =insert(p,tp->type,tp->value,0);
+        tp++;
+    }
 
     return tp;
 }
+
+
+
+Token* vari_decl(AST*p, Token* tp){
+    p = insert(p,p->type,p->value,1);
+    while(is_varidecl(tp->type)){
+        p = insert(p,p->type,p->value,0);
+        tp++;
+    }
+    return tp;
+}
+
+
