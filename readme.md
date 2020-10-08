@@ -68,3 +68,6 @@
 * 正在构建需要输出的json（各个流程框）
 * 思维有点宕机了
 
+* 学习了一下graphviz in python，准备先顺序输出ast，再由python调用输出的json信息进行连线
+* 其中json信息就只用包括label和shape
+* 输出AST应该也会采用自顶向下的方法

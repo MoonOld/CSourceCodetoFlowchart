@@ -5,16 +5,33 @@
 
 #include "header.h"
 #include "stdio.h"
+//put expression in the end
+//just need to find exp order and note that how flow jumps
+
+
+/*
+ * the json object designed like below
+ * {
+ *      "shape": "diamond"/"rect"/oval
+ *      "label": "if/while/for/else"+"exp"
+ * }
+ */
+
+
 
 int travel(AST* p,FILE* file)
 {
-    vari(); //print glo vari
-    mainfunc();
+    if(p =findvari(p))
+        putjson(p,file);
+    if(p = findmain(p)){
+        if(p = findvari(p))putjson(p,file);
+        if((p = find(EXP)))putjson(p,file);
+    }
     return 0;
 }
 
 
-int find(AST *p,int token){
+int findson(AST *p,int token){
     if((p = p->firstson)->type == token){
         p->type = 0;                    //find only once
         return 1;
@@ -31,9 +48,35 @@ int find(AST *p,int token){
     }
 }
 
-int putexp(AST*p, FILE* file){
-
-
-
+AST* putmain(){
     return 0;
 }
+
+AST * putvari(){
+
+}
+
+AST * putstmt(){
+
+}
+
+AST* putwhile(){
+
+}
+
+AST* putfor(){
+
+}
+
+AST * putif(){
+
+}
+
+AST* putelse(){
+
+}
+
+AST* putexp(){
+
+}
+
