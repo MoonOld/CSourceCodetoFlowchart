@@ -9,18 +9,18 @@
 
 
 //tokens and classes defined here
+#include "cJSON.h"
 enum{
-    Num = 128, Fun, Sys, Glo, Loc, Id,// Glo for global, Loc for local, sys for
-    Else, If, Char,Int,Float, Return, While,For,
+    Num = 128, Glo, Loc, Id,// Glo for global, Loc for local, sys for
+    Else, If, Char,Int,Float, Return, While,For,Continue,Break,
     Assign, Lor, Lan, Or, Xor,And, Eq, Ne, Lt,Gt, Le, Ge, Shl, Shr,//Lt <  Le <=
-    Add,Sub,Mul,Div, Mod,
+    Add,Sub,Mul,Div,Inc,Dec ,Mod,
     ary,Str,Brk
 };
 
 typedef struct  ident id;
 struct ident{
     int token;
-    int hash;
     char  name[11];
 };
 
@@ -69,8 +69,8 @@ enum {
     global_decl,
     function_defined,decl,
     parameter_decl,body_decl,variable_decl,stmt_st,
-    stnoempty,stempty,ifst,whilest,forst,forfdo,fordo,retexp,exp,stop,
-    condition,
+    empty_exp,ifst,elst,whilest,forst,forfdo,fordo,retexp,exp,stop,
+    condition,ctn,brk,
     arry
 };
 
@@ -81,7 +81,7 @@ int is_type(int tocheck);
 
 void load(FILE * _fileI,char* file);
 int stringcmp(char* a,char*b,int length);
-int lex(char * src ,Token * tp, id * ip,char str[100]);
+int lex(char * src ,Token * tp, id * ip,char (*str)[100]);
 int lextest(Token * tp, id* ip,char str[20][100]);
 
 
@@ -93,9 +93,14 @@ Token * if_st(AST* p,Token * tp);
 Token * stmt(AST*p ,Token* tp);
 Token * bd_st(AST* p,Token* tp );
 Token * para_decl(AST* p,Token* tp);
-Token * func_decl(AST * p, Token * tp);
+Token * func_def(AST * p, Token * tp);
 Token * glo_decl(AST* p,Token* tp);
 AST* parse(Token * tp);
+Token* vari_decl(AST*p, Token* tp);
+int in_field(int a);
+int is_varidecl(int a );
+int is_type(int tocheck);
+
 
 
 
