@@ -79,7 +79,7 @@ Token * glo_decl(AST* p,Token* tp)
 
 Token * func_def(AST * p, Token * tp)
 {
-    p = insert(p,tp->type,0,1);//insert type
+    p = insert(p,tp->type,tp->value,1);//insert type
     tp++;
     p = insert(p,tp->type,tp->value,0);//insert id
     tp++;

@@ -5,6 +5,7 @@
 
 #include "header.h"
 #include "stdio.h"
+#include "string.h"
 //put expression in the end
 //just need to find exp order and note that how flow jumps
 
@@ -19,64 +20,97 @@
 
 
 
-int travel(AST* p,FILE* file)
+int travel(AST* p,FILE* file,id* ip,char str[20][100])
 {
-    if(p =findvari(p))
-        putjson(p,file);
-    if(p = findmain(p)){
-        if(p = findvari(p))putjson(p,file);
-        if((p = find(EXP)))putjson(p,file);
+    p = p->firstson;
+    while(p){
+        if(p->type == variable_decl)
+            putvari(p,file,ip,str);
+        else if(p->type == function_defined)
+            putmain(p,file,ip,str);
+        p = p->fellow;
     }
     return 0;
 }
 
 
-int findson(AST *p,int token){
-    if((p = p->firstson)->type == token){
-        p->type = 0;                    //find only once
-        return 1;
-    }
-    else{
+int putmain(AST*p, FILE *file , id *ip, char str[20][100]){
+    if(strcmp((ip+  (   (p->firstson )->fellow  )  ->value )->name,"main")){
+        p = p->firstson;
         while(p){
-            if(p->type == token){
-                p ->type = 0;
-                return 1;
-            }
+            putexp(p,file,ip,str);//type
             p = p->fellow;
         }
-        return 0;
     }
-}
-
-AST* putmain(){
     return 0;
 }
 
-AST * putvari(){
+
+int putvari(AST* p, FILE *file, id*ip, char str[20][100]){
+    p = p->firstson;
+    putexp(p,file,ip,str);
+    return 0;
+}
+
+
+int putstmt(AST*p){
+    p = p->firstson;
+    while(p){
+        if(p->type == whilest)putwhile(p);
+        else if(p->type == ifst){
+            putif();
+        }
+        else if(p->type ==forst ){
+            putfor();
+        }
+        else if(p->type == retexp){
+            putret();
+        }
+        else if(p->type == brk){
+            putbrk();
+        }
+        else if(p->type == ctn ){
+            putctn();
+        }
+        else//p->type == exp
+        {
+            putexp();
+        }
+        p = p->fellow;
+    }
+}
+
+
+int putwhile(AST *p){
+    put(while,condition);
+
 
 }
 
-AST * putstmt(){
+
+int putfor(){
 
 }
 
-AST* putwhile(){
+
+int putif(){
 
 }
 
-AST* putfor(){
+
+int putelse(){
 
 }
 
-AST * putif(){
 
-}
+int putexp(AST *p, FILE* file,id*ip, char str[20][100]){
+    p = p->firstson;
+    while(p){
 
-AST* putelse(){
 
-}
+        p= p->fellow;
+    }
 
-AST* putexp(){
-
+    return 0;
 }
 
